@@ -35,7 +35,19 @@ while True:
         print()
 
     elif action == "2":
-        pass
+        print("Enter your card number:")
+        card_in = input()
+        print("Enter your PIN:")
+        pin_in = input()
+
+        if card_in in cards:
+            if cards[card_in] == pin_in:
+                print("You have successfully logged in!")
+            else:
+                print("Wrong card number or PIN!")
+        else:
+            print("Wrong card number or PIN!")
+
 
     elif action == "0":
         break
