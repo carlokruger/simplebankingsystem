@@ -1,8 +1,9 @@
 # Write your code here
 import random
 
+
 def mainmenu():
-    print("1. Create and account")
+    print("1. Create an account")
     print("2. Log into account")
     print("0. Exit")
 
@@ -17,8 +18,9 @@ iin = "400000"
 account = ""
 pin = ""
 cards = {}
+loop = True
 
-while True:
+while loop:
     mainmenu()
     action = input()
 
@@ -39,6 +41,10 @@ while True:
         print("Your card PIN")
         print(pin)
         print()
+        account = ""
+        checksum = ""
+        card_number = ""
+        pin = ""
 
     elif action == "2":
         print("Enter your card number:")
@@ -60,13 +66,15 @@ while True:
                     elif logged_in_action == "2":
                         break
                     elif logged_in_action == "0":
+                        loop = False
+                        print()
+                        print("Bye!")
                         break
 
             else:
                 print("Wrong card number or PIN!")
         else:
             print("Wrong card number or PIN!")
-
 
     elif action == "0":
         print("Bye!")
