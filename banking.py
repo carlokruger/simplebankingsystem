@@ -7,6 +7,12 @@ def mainmenu():
     print("0. Exit")
 
 
+def cardmenu():
+    print("1. Balance")
+    print("2. Log out")
+    print("0. Exit")
+
+
 iin = "400000"
 account = ""
 pin = ""
@@ -43,6 +49,19 @@ while True:
         if card_in in cards:
             if cards[card_in] == pin_in:
                 print("You have successfully logged in!")
+                print()
+                while True:
+                    cardmenu()
+                    logged_in_action = input()
+
+                    if logged_in_action == "1":
+                        print("Balance: 0")
+                        print()
+                    elif logged_in_action == "2":
+                        break
+                    elif logged_in_action == "0":
+                        break
+
             else:
                 print("Wrong card number or PIN!")
         else:
@@ -50,4 +69,5 @@ while True:
 
 
     elif action == "0":
+        print("Bye!")
         break
