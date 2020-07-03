@@ -13,6 +13,26 @@ def cardmenu():
     print("2. Log out")
     print("0. Exit")
 
+def generate_checksum(account):
+    account_list = []
+    checksum_sum = 0
+
+    for x in account:
+        account_list.append(int(x))
+
+    for idx, el in enumerate(account_list):
+        if (idx + 1) % 2 != 0:
+            account_list[idx] = el * 2
+
+    for idy, y in enumerate(account_list):
+        if account_list[idy] > 9:
+            account_list[idy] -= 9
+
+    for z in account_list:
+        checksum_sum += z
+
+    return str(10 - ( checksum_sum % 10))
+
 
 iin = "400000"
 account = ""
@@ -27,7 +47,7 @@ while loop:
     if action == "1":
         for i in range(9):
             account += str(random.randint(0, 9))
-        checksum = str(random.randint(0, 9))
+        checksum = generate_checksum(iin+account)
         card_number = iin + account + checksum
 
         for j in range(4):
