@@ -1,5 +1,6 @@
 # Write your code here
 import random
+import sqlite3
 
 
 def mainmenu():
@@ -40,20 +41,33 @@ pin = ""
 cards = {}
 loop = True
 
+# create DB
+conn = sqlite3.connect('card.s3db')
+cur = conn.cursor()
+# cur.execute('CREATE DATABASE card;')
+# cur.commit()
+cur.execute('create table if not exists card (id INT, number TEXT, pin TEXT, balance INT);')
+conn.commit()
+
 while loop:
     mainmenu()
     action = input()
 
     if action == "1":
-        for i in range(9):
+        for _i in range(9):
             account += str(random.randint(0, 9))
         checksum = generate_checksum(iin+account)
         card_number = iin + account + checksum
 
-        for j in range(4):
+        for _j in range(4):
             pin += str(random.randint(0, 9))
 
-        cards.update({card_number: pin})
+        state = 'INSERT INTO card (id, number, pin, balance) VALUES (?, ?, ?, ?);'
+        id = random.randint(0, 10000)
+        data_tuple = (id, card_number, pin, 0)
+
+        cur.execute(state, data_tuple)
+        conn.commit()
 
         print("Your card has been created")
         print("Your card number:")
@@ -93,6 +107,37 @@ while loop:
 
             else:
                 print("Wrong card number or PIN!")
+        else:
+            print("Wrong card number or PIN!")
+
+        rows = cur.execute('SELECT count(id) from card where number = ?', card_in)
+        conn.commit()
+
+        if rows == 1:
+            pin_sql = cur.execute('SELECT pin from card where number = ?', card_in)
+            conn.commit()
+            if pin_sql == pin_in:
+                print("You have successfully logged in!")
+                print()
+
+                while True:
+                    cardmenu()
+                    logged_in_action = input()
+                    if logged_in_action == 1:
+                        bal = cur.execute('SELECT balance from card where number = ?', card_in)
+                        print("Balance: ", bal)
+                        print()
+                    elif logged_in_action == 2:
+                        break
+                    elif logged_in_action == 0:
+                        loop = False
+                        print()
+                        print("Bye!")
+                        break
+
+            else:
+                print("Wrong card number or PIN!")
+
         else:
             print("Wrong card number or PIN!")
 
