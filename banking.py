@@ -14,6 +14,7 @@ def cardmenu():
     print("2. Log out")
     print("0. Exit")
 
+
 def generate_checksum(account):
     account_list = []
     checksum_sum = 0
@@ -32,7 +33,7 @@ def generate_checksum(account):
     for z in account_list:
         checksum_sum += z
 
-    return str(10 - ( checksum_sum % 10))
+    return str(10 - (checksum_sum % 10))
 
 
 iin = "400000"
@@ -46,8 +47,13 @@ conn = sqlite3.connect('card.s3db')
 cur = conn.cursor()
 # cur.execute('CREATE DATABASE card;')
 # cur.commit()
-cur.execute('create table if not exists card (id INT, number TEXT, pin TEXT, balance INT);')
+cur.execute('DROP TABLE if exists card')
 conn.commit()
+
+
+cur.execute('create table if not exists card (id INTEGER, number TEXT, pin TEXT, balance INTEGER DEFAULT 0);')
+conn.commit()
+
 
 while loop:
     mainmenu()
@@ -86,50 +92,35 @@ while loop:
         print("Enter your PIN:")
         pin_in = input()
 
-        if card_in in cards:
-            if cards[card_in] == pin_in:
-                print("You have successfully logged in!")
-                print()
-                while True:
-                    cardmenu()
-                    logged_in_action = input()
-
-                    if logged_in_action == "1":
-                        print("Balance: 0")
-                        print()
-                    elif logged_in_action == "2":
-                        break
-                    elif logged_in_action == "0":
-                        loop = False
-                        print()
-                        print("Bye!")
-                        break
-
-            else:
-                print("Wrong card number or PIN!")
-        else:
-            print("Wrong card number or PIN!")
-
-        rows = cur.execute('SELECT count(id) from card where number = ?', card_in)
+        idrow = (card_in,)
+        rows = cur.execute('SELECT count(id) from card where number = ?', idrow)
+        rows = cur.fetchone()
         conn.commit()
 
-        if rows == 1:
-            pin_sql = cur.execute('SELECT pin from card where number = ?', card_in)
+        if rows[0] == 1:
+            pin_sql = cur.execute('SELECT pin from card where number = ?', idrow)
+            pin_sql = cur.fetchone()
             conn.commit()
-            if pin_sql == pin_in:
+
+            if pin_sql[0] == pin_in:
                 print("You have successfully logged in!")
                 print()
 
                 while True:
                     cardmenu()
                     logged_in_action = input()
-                    if logged_in_action == 1:
-                        bal = cur.execute('SELECT balance from card where number = ?', card_in)
-                        print("Balance: ", bal)
+                    if logged_in_action == '1':
+                        bal = cur.execute('SELECT balance from card where number = ?', idrow)
+                        bal = cur.fetchone()
+                        conn.commit()
+
                         print()
-                    elif logged_in_action == 2:
+                        print("Balance: ", bal[0])
+                        print()
+                    elif logged_in_action == '2':
                         break
-                    elif logged_in_action == 0:
+                    elif logged_in_action == '0':
+                        conn.close()
                         loop = False
                         print()
                         print("Bye!")
@@ -142,5 +133,6 @@ while loop:
             print("Wrong card number or PIN!")
 
     elif action == "0":
+        conn.close()
         print("Bye!")
         break
