@@ -11,7 +11,10 @@ def mainmenu():
 
 def cardmenu():
     print("1. Balance")
-    print("2. Log out")
+    print("2. Add income")
+    print("3. Do transfer")
+    print("4. Close account")
+    print("5. Log out")
     print("0. Exit")
 
 
@@ -33,7 +36,10 @@ def generate_checksum(account):
     for z in account_list:
         checksum_sum += z
 
-    return str(10 - (checksum_sum % 10))
+    if checksum_sum % 10 == 0:
+        return '0'
+    else:
+        return str(10 - (checksum_sum % 10))
 
 
 iin = "400000"
@@ -47,8 +53,8 @@ conn = sqlite3.connect('card.s3db')
 cur = conn.cursor()
 # cur.execute('CREATE DATABASE card;')
 # cur.commit()
-cur.execute('DROP TABLE if exists card')
-conn.commit()
+# cur.execute('DROP TABLE if exists card')
+# conn.commit()
 
 
 cur.execute('create table if not exists card (id INTEGER, number TEXT, pin TEXT, balance INTEGER DEFAULT 0);')
@@ -108,18 +114,69 @@ while loop:
 
                 while True:
                     cardmenu()
-                    logged_in_action = input()
-                    if logged_in_action == '1':
+                    logged_in_action = int(input())
+                    if logged_in_action == 1:
                         bal = cur.execute('SELECT balance from card where number = ?', idrow)
                         bal = cur.fetchone()
                         conn.commit()
-
                         print()
                         print("Balance: ", bal[0])
                         print()
-                    elif logged_in_action == '2':
+
+                    elif logged_in_action == 2:
+                        print("Enter income:")
+                        funds_in = int(input())
+                        cur.execute('UPDATE card SET balance = balance + ? WHERE number = ?', (funds_in, card_in))
+                        conn.commit()
+                        print("Income was added!")
+                        print()
+
+                    elif logged_in_action == 3:
+                        print("Transfer")
+                        print("Enter card number:")
+                        transfer_account = input()
+                        account_sub = transfer_account[0:15]
+                        check = str(generate_checksum(account_sub))
+                        account_exists = cur.execute('SELECT count(id) from card WHERE number = ?', (transfer_account,))
+                        account_exists = cur.fetchone()
+
+                        if check != transfer_account[-1]:
+                            print("Probably you made mistake in the card number. Please try again!")
+                            print()
+                        elif account_exists[0] != 1:
+                            print("Such a card does not exist.")
+                            print()
+                        else:
+                            print("Enter how much money you want to transfer:")
+                            funds_out = int(input())
+                            current_funds = cur.execute('SELECT balance FROM card WHERE number = ?', (card_in,))
+                            current_funds = cur.fetchone()
+                            conn.commit()
+
+                            if funds_out > current_funds[0]:
+                                print("Not enough money")
+                                print()
+                            else:
+                                cur.execute('UPDATE card set balance = balance + ? WHERE number = ?',
+                                            (funds_out, transfer_account))
+                                cur.execute('UPDATE card SET balance = balance - ? WHERE number = ?',
+                                            (funds_out, card_in))
+                                conn.commit()
+                                print("Success!")
+                                print()
+
+
+                    elif logged_in_action == 4:
+                        cur.execute('DELETE FROM card WHERE number = ?', (card_in, ))
+                        conn.commit()
+                        print("The account has been closed!")
+                        print()
                         break
-                    elif logged_in_action == '0':
+
+                    elif logged_in_action == 5:
+                        break
+
+                    elif logged_in_action == 0:
                         conn.close()
                         loop = False
                         print()
